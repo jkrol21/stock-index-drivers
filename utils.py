@@ -55,15 +55,24 @@ def plot_candlestick(plot_df, subject_name=''):
         y=plot_df['Volume'],
         showlegend=False,
         marker={
-            "color": "#666565",
+            "color": "#b3b3b3",
         }
     )
 
     fig = go.Figure(candlesticks)
     fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    #fig.update_layout(
+    #    autosize=False,
+    #    width=900,
+    #    height=600
+    #)
     fig.add_trace(candlesticks, secondary_y=True)
     fig.add_trace(volume_bars, secondary_y=False)
-    fig.update_layout(title="Kursentwicklung - " + subject_name, height=800)
+    fig.update_layout(title="Kursentwicklung - " + subject_name, 
+                        height=800,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)')
     fig.update_yaxes(title="Kurs", secondary_y=True, showgrid=True)
     fig.update_yaxes(title="Volumen", secondary_y=False, showgrid=False)
     

@@ -1,8 +1,11 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
+import plotly.io as pio
+import plotly.express as px
 
 from utils import index_components_shap_values, plot_candlestick, read_sql_query
+pio.templates.default = "plotly_white"
 
 prices_db_path = './data/PriceData.sqlite'
 
@@ -82,13 +85,14 @@ def load_stock_index():
 #    return download_data.to_csv(index=False).encode('utf-8')
 
 
-st.set_page_config(page_title='DAX Wertveränderung')
+st.set_page_config(page_title='DAX Wertveränderung',
+                    layout="wide")
 
 st.markdown("## DAX Kursentwicklung")
 
 index_data = load_stock_index()
 candlestick_plotly_fig = plot_candlestick(index_data, subject_name='DAX')
-st.plotly_chart(candlestick_plotly_fig)
+st.plotly_chart(candlestick_plotly_fig, use_container_width=True)
 
 # Metadata for stocks in index 
 index_components_metadata = load_index_components_metadata()
@@ -101,7 +105,7 @@ st.markdown("""
     #### Veränderung im Zeitraum:
     """)
 
-col1, col2= st.columns(2)
+col1, col2, _ = st.columns([1,1,3])
 
 with col1:
     start_date = st.selectbox("Beginn", index_data.Date.dt.date.unique())
@@ -137,22 +141,26 @@ fig = px.bar(plot_df,
              y="Stock",
              #color='Sign',
              #color_discrete_map={'negative':'red', 'positive':'blue'},
-             width=800, 
+             width=1000, 
              height=1000
             )
 
 fig.update_yaxes(title="")
 fig.update_xaxes(title="Einfluss auf Index")
-fig.update_layout(title="Einfluss der Einzelwerte auf den DAX (" + str(start_date) + " - " + str(end_date) + ")")
+fig.update_layout(title="Einfluss der Einzelwerte auf den DAX (" + str(start_date) + " - " + str(end_date) + ")",
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)')
 
 st.plotly_chart(fig)
 
 st.markdown("## Entwicklung der Einzelwerte")
 
-stock_of_interest = st.selectbox('Aktie', list(index_components_metadata['Name']))
+col_1, _ = st.columns([1,4])
+with col_1:
+    stock_of_interest = st.selectbox('Aktie', list(index_components_metadata['Name']))
 
 stock_ticker = index_components_metadata.loc[index_components_metadata['Name'] == stock_of_interest, 'Ticker'].iloc[0]
 
 stock_price_df = index_components_price_history.loc[index_components_price_history['Ticker'] == stock_ticker]
 candlestick_plotly_fig = plot_candlestick(stock_price_df, subject_name=stock_of_interest)
-st.plotly_chart(candlestick_plotly_fig)
+st.plotly_chart(candlestick_plotly_fig, use_container_width=True)
